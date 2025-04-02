@@ -34,7 +34,7 @@ jobs:
 
       - name:  Install dependencies
         run: |
-          pip install -r backend/requirements.txt
+          pip install -r requirements.txt
 
       - name:  Run basic check (curl test)
         run: |
