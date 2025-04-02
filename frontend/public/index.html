@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker CRUD App - Home</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <h1>Docker CRUD App - Home</h1>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+    </nav>
+
+    <form id="itemForm">
+        <input type="text" id="name" placeholder="Item Name" required>
+        <input type="text" id="description" placeholder="Item Description" required>
+        <button type="submit">Add Item</button>
+    </form>
+
+    <h2>Items List</h2>
+    <ul id="itemsList"></ul>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

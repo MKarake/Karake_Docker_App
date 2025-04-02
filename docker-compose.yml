@@ -1,0 +1,63 @@
+services:
+  frontend: # Defines the frontend service.
+    image: mkarake/karake-frontend:latest  # ✅ use Docker Hub image instead of building
+    ports:
+      - "8080:80"  # Map frontend container’s port 80 to host’s 8080  so we access it through http://localhost:8080
+    depends_on:
+      - backend  # Waits for the backend before running
+
+  backend:
+    image: mkarake/karake-backend:latest  # ✅ pull from Docker Hub
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/mydatabase
+
+
+  db:
+    image: postgres:13  # Uses official PostgreSQL image
+    restart: always  #  Restart if container crashes
+    environment:
+      POSTGRES_USER: postgres  # PostgreSQL username
+      POSTGRES_PASSWORD: password  # PostgreSQL password
+      POSTGRES_DB: mydatabase  #  name of the database
+    volumes:                                                #without volume the database would start but empty
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  #  Automatically runs your init.sql on first launch so it takes the init.sql created locally and put it in the container , exactly in the folder /docker-entrypoint-initdb.d/."
+    ports:
+      - "5432:5432"  # PostgreSQL available on port 5432
+    healthcheck:  #  Ensure database is ready before backend starts
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mydatabase"]
+      interval: 5s #Run this test every 5s
+      retries: 5 # try up to 5 times
+      start_period: 10s # give the container 10 sec before starting the health check
+    
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml  # ✅ Mount custom config file
+    ports:
+      - "9090:9090"  # ✅ Prometheus UI will be available at http://localhost:9090
+    depends_on:
+      - backend  # ✅ Prometheus should wait for backend to start
+
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"  # Access Grafana at http://localhost:3000
+    volumes:
+      - grafana-storage:/var/lib/grafana  # Persistent storage for dashboards
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin       # Default username
+      - GF_SECURITY_ADMIN_PASSWORD=admin   # Default password
+
+volumes:
+  grafana-storage:
+
