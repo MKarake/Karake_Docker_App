@@ -24,18 +24,19 @@ jobs:
           --health-retries 5
 
     steps:
-      - name:  Checkout code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name:  Set up Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
-      - name:  Install dependencies
+      - name: Install dependencies
         run: |
           pip install -r requirements.txt
+          pip install pytest
 
-      - name:  Run basic check (curl test)
+      - name: Run tests with pytest
         run: |
-          echo " CI is working! Add pytest or curl tests here later."
+          pytest
