@@ -36,7 +36,25 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-
       - name: Run tests with pytest
         run: |
           pytest
+
+      - name:  Validate Docker image tags for AWS ECR
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECR_BACKEND_REPO: ${{ secrets.ECR_BACKEND_REPO }}
+          ECR_FRONTEND_REPO: ${{ secrets.ECR_FRONTEND_REPO }}
+        run: |
+          echo " Validating Docker image tags..."
+          BACKEND_TAG="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_BACKEND_REPO:ci-test"
+          FRONTEND_TAG="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_FRONTEND_REPO:ci-test"
+
+          docker build -t $BACKEND_TAG ./backend
+          docker build -t $FRONTEND_TAG ./frontend
+
+          echo "Backend image: $BACKEND_TAG"
+          echo " Frontend image: $FRONTEND_TAG"
+
+          docker images | grep "$AWS_ACCOUNT_ID" || (echo " Image tag does not include the expected AWS account ID" && exit 1)
