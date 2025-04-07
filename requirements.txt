@@ -5,3 +5,4 @@ sqlalchemy
 prometheus_fastapi_instrumentator
 pytest
 requests
+httpx
